@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import { combineLatest, from, map, of, tap, toArray } from 'rxjs';
+import { ContentService } from './content.service';
 
 @Component({
   selector: 'app-root',
@@ -10,23 +11,27 @@ import { combineLatest, from, map, of, tap, toArray } from 'rxjs';
   template: `
   @if (viewModel$ | async; as vm) {
     <h1>{{ vm.title }}</h1>
-    <h1>{{ vm.titles }}</h1>
+    <h2>{{ vm.titles }}</h2>
+    <p>{{ vm.body }}</p>
   }
-    <router-outlet></router-outlet>
+  <button (click)="updateValue()">Update Title and Body values</button>
+  <router-outlet></router-outlet>
   `,
 })
 export class AppComponent {
-  title = 'Idiomatic Reactive Data Streams';
-  title$ = of(this.title).pipe(
-    map((title) => title.toUpperCase())
-  );
-  titles$ = from(this.title).pipe(
-    tap(console.log),
-    toArray(),
-    map((titles) => titles.join(''))
+
+  contentService = inject(ContentService);
+
+  viewModel$ = combineLatest([
+    this.contentService.title$,
+    this.contentService.titles$,
+    this.contentService.body$
+  ]).pipe(
+    map(([title, titles, body]) => ({ title, titles, body}))
   );
 
-  viewModel$ = combineLatest([this.title$, this.titles$]).pipe(
-    map(([title, titles]) => ({ title, titles }))
-  );
+  updateValue() {
+    this.contentService.title = 'It did NOT update :(';
+    this.contentService.body.next('It updated!!!!');
+  }
 }
