@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
-import { from, of } from 'rxjs';
+import { from, map, of, tap, toArray } from 'rxjs';
 
 @Component({
   selector: 'app-root',
@@ -15,6 +15,12 @@ import { from, of } from 'rxjs';
 })
 export class AppComponent {
   title = 'Idiomatic Reactive Data Streams';
-  title$ = of(this.title);
-  titles$ = from(this.title);
+  title$ = of(this.title).pipe(
+    map((title) => title.toUpperCase())
+  );
+  titles$ = from(this.title).pipe(
+    tap(console.log),
+    toArray(),
+    map((titles) => titles.join(''))
+  );
 }
