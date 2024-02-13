@@ -1,4 +1,4 @@
-interface IContent {
+export interface IContent {
   title: string;
   body: string;
   welcomeMessage: string;
@@ -18,7 +18,7 @@ export const content: IContent = {
   },
 };
 
-interface IUser {
+export interface IUser {
   poid: string;
 }
 
@@ -26,7 +26,7 @@ export const user: IUser = {
   poid: '123',
 };
 
-interface IUsersMetadata {
+export interface IUsersMetadata {
   [key: string]: {
     name: string;
     email: string;
@@ -40,7 +40,7 @@ export const usersMetadata: IUsersMetadata = {
   },
 };
 
-interface IUserRoles {
+export interface IUserRoles {
   [key: string]: {
     roles: string[];
   };
