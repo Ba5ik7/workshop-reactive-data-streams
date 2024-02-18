@@ -11,7 +11,7 @@ export class ContentService {
 
   fetchContent$(): Observable<IContent> {
     return of(content).pipe(
-      tap(content => this._content.next(content))
+      tap((content) => this._content.next(content)),
     );
   }
 }
