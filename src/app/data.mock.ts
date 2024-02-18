@@ -48,6 +48,6 @@ export interface IUserRoles {
 
 export const userRoles: IUserRoles = {
   [user.poid]: {
-    roles: ['admin'],
+    roles: ['admin', 'superuser'],
   },
 };

@@ -2,7 +2,7 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import { ContentService } from './content.service';
-import { combineLatest, map, switchMap } from 'rxjs';
+import { combineLatest, map, startWith } from 'rxjs';
 import { UserService } from './user.service';
 
 @Component({
@@ -12,10 +12,16 @@ import { UserService } from './user.service';
   template: `
     @if (viewModel$ | async; as vm) { 
       <h3>{{ vm.title }}</h3>
-      <p>{{ vm.body }}</p>
+      <p>{{ vm.truncate(vm.body ?? '', 12) }}</p>
       <hr />
       <h1>{{ vm.welcomeMessage }} {{ vm.name }}</h1>
-      <p>{{ vm.userInfo?.emailLabel }}: {{ vm.email }}</p>
+      <p>{{ vm.emailLabel }}: {{ vm.email }}</p>
+
+      <p>{{ vm.rolesLabel }}: 
+      @for (role of vm.roles; track $index) {
+        {{ role }}
+      }
+      </p>
     }
     <router-outlet></router-outlet>
   `,
@@ -26,12 +32,17 @@ export class AppComponent {
 
   viewModel$ = combineLatest([
     this.contentService.content$,
-    this.userService.fetchUser$(),
+    this.userService.fetchUser$().pipe(startWith(undefined)),
+    this.userService.userMetadata$.pipe(startWith(undefined)),
   ]).pipe(
-    switchMap(([content, user]) => {
-      return this.userService.fetchUserMetadata$(user.poid).pipe(
-        map(userMetadata => ({ ...content, ...user, ...userMetadata })),
-      );
-    })
+    map(([user, content, userMetadata]) => ({
+      ...user, ...content, ...userMetadata
+    })),
+    map(vm => ({
+      ...vm,
+      ...vm.userInfo,
+      title: vm.title?.toUpperCase(),
+      truncate: (str: string, length: number) => str.slice(0, length) + '...',
+    }))
   );
 }
