@@ -2,7 +2,7 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import { ContentService } from './content.service';
-import { combineLatest, map, startWith } from 'rxjs';
+import { catchError, combineLatest, map, startWith } from 'rxjs';
 import { UserService } from './user.service';
 
 @Component({
@@ -11,15 +11,19 @@ import { UserService } from './user.service';
   imports: [CommonModule, RouterOutlet],
   template: `
     @if (viewModel$ | async; as vm) { 
-      <h3>{{ vm.title }}</h3>
-      <p>{{ vm.truncate(vm.body ?? '', 12) }}</p>
+      <h3>{{ vm.title | uppercase }}</h3>
+      <p>{{ vm.body | slice: 0 : 12  }}...</p>
       <hr />
-      <h1>{{ vm.welcomeMessage }} {{ vm.name }}</h1>
-      <p>{{ vm.emailLabel }}: {{ vm.email }}</p>
+      <h1>{{ vm.welcomeMessage }} {{ vm.name ?? 'I Should be a Pipe' }}</h1>
+      <p>{{ vm.emailLabel }}: {{ vm.email ?? 'I Should be a Pipe' }}</p>
 
-      <p>{{ vm.rolesLabel }}: 
-      @for (role of vm.roles; track $index) {
-        {{ role }}
+      <p>{{ vm.rolesLabel }}:
+      @if (vm.roles) {
+        @for (role of vm.roles; track $index) {
+          {{ role }}
+        }
+      } @else {
+        Loading roles...
       }
       </p>
     }
@@ -35,14 +39,15 @@ export class AppComponent {
     this.userService.fetchUser$().pipe(startWith(undefined)),
     this.userService.userMetadata$.pipe(startWith(undefined)),
   ]).pipe(
-    map(([user, content, userMetadata]) => ({
-      ...user, ...content, ...userMetadata
+    map(([content, user, userMetadata]) => ({
+      ...user, 
+      ...content, 
+      ...userMetadata,
+      ...content?.userInfo,
     })),
-    map(vm => ({
-      ...vm,
-      ...vm.userInfo,
-      title: vm.title?.toUpperCase(),
-      truncate: (str: string, length: number) => str.slice(0, length) + '...',
-    }))
+    catchError((error) => {
+      console.warn('Paased down to viewModel ::', error);
+      throw error;
+    })
   );
 }

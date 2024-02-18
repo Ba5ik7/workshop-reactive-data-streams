@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, delay, filter, forkJoin, map, of, switchMap, tap } from 'rxjs';
-import { IUser, user, userRoles, usersMetadata } from './data.mock';
+import { BehaviorSubject, Observable, catchError, combineLatest, delay, filter, forkJoin, map, of, startWith, switchMap, tap, throwError } from 'rxjs';
+import { IUser, IUserRoles, IUsersMetadata, user, userRoles, usersMetadata } from './data.mock';
 
-type TUserMetadata = { name: string; email: string };
-type TUserRoles = { roles: string[] };
+type TUserMetadata = Pick<IUsersMetadata[string], 'name' | 'email'>;
+type TUserRoles = Pick<IUserRoles[string], 'roles'>;
 type TUserMetadataAndRoles = TUserMetadata & TUserRoles;
 
 @Injectable({
@@ -14,32 +14,53 @@ export class UserService {
   user$ = this._user.asObservable();
 
   private _userMetadata = new BehaviorSubject<
-    TUserMetadataAndRoles | undefined
+    Partial<TUserMetadataAndRoles> | undefined
   >(undefined);
 
   userMetadata$ = this.user$.pipe(
+    // tap(() => {
+    //   throw new Error('Error fetching user metadata');
+    // }),
     filter((user): user is NonNullable<typeof user> => !!user),
     switchMap((user) => {
-      return forkJoin({
+      return combineLatest({
         userMetadata: of(usersMetadata[user.poid]),
-        userRoles: this.fetchUserRoles$(user),
+        userRoles: this.fetchUserRoles$(user).pipe(startWith(undefined)),
       });
     }),
     map(({ userMetadata, userRoles }) => ({ ...userMetadata, ...userRoles })),
-    tap((userMetadataAndRoles) => this._userMetadata.next(userMetadataAndRoles))
+    tap((userMetadataAndRoles) => this._userMetadata.next(userMetadataAndRoles)),
+    catchError((error) => {
+      console.warn('Error fetching user metadata', error);
+      return throwError(() => new Error('Pass the error along'));
+    })
   );
 
   fetchUser$(): Observable<IUser> {
     return of(user).pipe(
+      // tap(() => {
+      //   throw new Error('Error fetching user');
+      // }),
       delay(1500),
-      tap((user) => this._user.next(user))
+      tap((user) => this._user.next(user)),
+      catchError((error) => {
+        console.warn('Error fetching user', error);
+        throw error;
+      })
     );
   }
 
-  fetchUserRoles$(user: IUser): Observable<{ roles: string[] }> {
+  fetchUserRoles$(user: IUser): Observable<TUserRoles> {
     return of(userRoles[user.poid]).pipe(
-      delay(1500),
-      map((userRoles) => ({ roles: userRoles.roles }))
+      // tap(() => {
+      //   throw new Error('Error fetching user roles');
+      // }),
+      delay(3000),
+      map((userRoles) => ({ roles: userRoles.roles })),
+      catchError((error) => {
+        console.warn('Error fetching user', error);
+        return of({ roles: ['Error Getting Roles'] });
+      })
     );
   }
 }
