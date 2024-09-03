@@ -43,6 +43,8 @@ fancy LSPs we have now, on Sublime back in the day. So, this allowed us
 to tell the next dev that this was something you could subscribe to. One
 can argue that we don't need it anymore... old habits die hard.*
 
+[https://angular.io/guide/observables#naming-conventions-for-observables](https://angular.io/guide/observables#naming-conventions-for-observables)
+
 **Code:** Copy of boilerplate code
 ``` javascript
 @Component({
@@ -76,10 +78,12 @@ Observable to prevent memory leaks. This is done by creating a
 subscription when the `Subject` emits a value.
 
 
-## **Step 2:**
+#  **Step 2:**
 **Explain:** The async pipe is a powerful Angular feature that allows
 you to subscribe to observables directly from your templates.
 A huge piece of what makes this pattern idiomatic.
+
+[https://angular.dev/api/common/AsyncPipe?tab=description](https://angular.dev/api/common/AsyncPipe?tab=description)
 
 **Explain:** It handles subscription management automatically,
 subscribing to the observable when the component loads and unsubscribing
@@ -104,10 +108,14 @@ export class AppComponent {
 3. You're simply expressing that the template should display whatever the Observable emits without worrying about the underlying steps.
 
 **Note:** The `async` pipe is a built-in Angular pipe that subscribes to an Observable or *Promise* and returns the latest value it has emitted.
+**Strategy Pattern:**
+[https://github.com/angular/angular/blob/main/packages/common/src/pipes/async_pipe.ts#L31-L56](https://github.com/angular/angular/blob/main/packages/common/src/pipes/async_pipe.ts#L31-L56)
 
-## **Step 3:**
+#  **Step 3:**
 
 **Explain:** RxJS operators are functions that allow you to manipulate the items emitted by observables in various ways, such as transforming values, filtering streams, or combining multiple observables.
+
+[https://rxjs.dev/api?query=operator](https://rxjs.dev/api?query=operator)
 
 **Code:** Copy of boilerplate code
 ``` javascript
@@ -154,6 +162,8 @@ export class AppComponent {
 
 **Explain:** Here, we're converting a string into an observable. The `tap` operator is used for debugging purposes, allowing you to perform side effects without affecting the stream. You can also use the `toArray` operator to collect all the emitted values into an array, and the `map` operator to transform the array into a single string.
 
+**Ask Copilot:** Hello, I'm exploring different opterators with RxJS reactive library. Can you please expain to me the `audit` opterator in a way that a Pokémon catcher would understand?
+
 **Explain:** We can see that adding an `async` pipe to the template will automatically subscribe to the observable and display the emitted value. However, this can be problematic if you have multiple `async` pipes in the same template, as each pipe will subscribe to the observable independently, potentially causing multiple subscriptions and performance issues.
 
 **Explain:** The `async` pipe is a powerful tool, but it's important to use it judiciously and be aware of its behavior to avoid potential pitfalls. Like if the value is `0` of `false`. In this case the value will never show.
@@ -161,7 +171,7 @@ export class AppComponent {
 
 **Note:** It's a good practice to limit the number of `async` pipes in your templates and consider using the `combineLatest` operator to combine multiple observables into a single observable that emits an array of the latest values from each source.
 
-## **Step 4:**
+#  **Step 4:**
 
 **Explain:** The `combineLatest` operator is used to combine multiple observables into a single observable that emits an array of the latest values from each source.
 
@@ -205,6 +215,7 @@ export class AppComponent {
 ```
 
 **Explain:** Angular has another useful pipe called `json` that can be used to display the JSON representation of an object. This can be helpful for debugging purposes or when you want to display the raw data in your template.
+[https://angular.dev/api?type=pipe#angular_common](https://angular.dev/api?type=pipe#angular_common)
 
 **Code:** Copy of boilerplate code
 ``` html
@@ -222,6 +233,7 @@ export class AppComponent {
 ```
 
 **Explain:** Use the Angular's structural directive `*ngIf` or new `@if` with the async pipe to unwrap the combined observable and access the title and titles properties.
+[https://angular.dev/api/core/@if](https://angular.dev/api/core/@if)
 
 **Explain:** The `as` keyword allows you to assign the unwrapped value to a local variable, `vm`, which you can then use to access the properties of the object.
 
@@ -262,9 +274,11 @@ export class AppComponent {
 
 **Explain:** Adding the else block to the `@if` directive allows you to handle the case where the observable has not emitted a value yet. You can display a loading spinner or error message in this block to provide a better user experience.
 
+[https://angular.dev/tutorials/learn-angular/4-control-flow-if#use-else-in-the-template](https://angular.dev/tutorials/learn-angular/4-control-flow-if#use-else-in-the-template)
 
 
-## **Step 5:**
+
+#  **Step 5:**
 
 **Create File** `ng generate service data`
 
@@ -292,6 +306,7 @@ export class DataService {
 ```
 
 **Explain:** Angular services are, most of the time, singleton objects. They are only instantiated once and can be injected into any component or service that requests them through dependency injection. So, basicly they are never '*newed*' up.
+[https://angular.dev/guide/ngmodules/singleton-services#](https://angular.dev/guide/ngmodules/singleton-services#)
 
 **Code:** Copy of boilerplate code
 ``` javascript
@@ -306,6 +321,7 @@ export class AppComponent {
 ```
 
 **Explain:** The new `inject` function is used to inject a service into a component or service. This function is a shorthand for the `constructor` method and automatically injects the service into the component or service.
+[https://angular.dev/reference/migrations/inject-function#](https://angular.dev/reference/migrations/inject-function#)
 
 **Create File** `ng generate service user`
 
@@ -366,7 +382,7 @@ export class AppComponent {
 * **Subject:** It does not store the current value. When a user subscribes, it will not receive the "current value" from the Subject.
 * **ReplaySubject:** It stores a number of values and will replay those values to new subscribers. It stores the values in a buffer that will be sent to new subscribers.
 
-## **Step 6:**
+#  **Step 6:**
 #### Do you have enough time to complete the reactive data streams?
 
 **Explain:** This is rushing into the 2nd workshop on this topic. However, I believe it's important for this group to see the pattern from end to end.
